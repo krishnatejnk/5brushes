@@ -13,40 +13,45 @@ export default function ArtistRegister() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!form.name.trim())       return setError('Please enter your name.')
+    if (!form.name.trim())        return setError('Please enter your name.')
     if (form.password.length < 6) return setError('Password must be at least 6 characters.')
     setError('')
     setLoading(true)
 
-    const { data, error: signUpErr } = await supabase.auth.signUp({
+    const { error: signUpErr } = await supabase.auth.signUp({
       email:    form.email,
       password: form.password,
+      options: {
+        data: {
+          name: form.name.trim(),
+          bio:  form.bio.trim(),
+        },
+      },
     })
 
     if (signUpErr) {
-      if (signUpErr.message.includes('already registered')) {
+      if (signUpErr.message.toLowerCase().includes('already registered')) {
         setError('This email is already registered.')
       } else {
-        setError('Registration failed. Please try again.')
+        setError(signUpErr.message || 'Registration failed. Please try again.')
       }
       setLoading(false)
       return
     }
 
-    const { error: insertErr } = await supabase.from('artists').insert({
-      id:    data.user.id,
-      name:  form.name.trim(),
-      bio:   form.bio.trim(),
-      email: form.email.trim(),
+    // Artist profile is created automatically via database trigger.
+    // Sign in immediately so the session is active.
+    const { error: signInErr } = await supabase.auth.signInWithPassword({
+      email:    form.email,
+      password: form.password,
     })
 
-    if (insertErr) {
-      setError('Account created but profile setup failed. Please contact support.')
-      setLoading(false)
-      return
+    if (signInErr) {
+      // Account created — redirect to login
+      navigate('/artist/login')
+    } else {
+      navigate('/artist/dashboard')
     }
-
-    navigate('/artist/dashboard')
     setLoading(false)
   }
 

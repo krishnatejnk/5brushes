@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "portfolio",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "C:\\Users\\Krishna\\Desktop\\Stuff\\PortfoloioWebsite", "run", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "3brushes",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "C:\\Users\\Krishna\\Desktop\\Stuff\\MOM\\art website", "run", "dev"],
+      "port": 5173
+    }
+  ]
+}

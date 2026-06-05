@@ -1,0 +1,22 @@
+.gallery-page { padding-top: 48px; }
+
+.gallery-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 36px;
+}
+
+.filter-chip {
+  padding: 8px 18px;
+  border-radius: 99px;
+  border: 1.5px solid var(--border);
+  background: var(--white);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--mid);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.filter-chip:hover  { border-color: var(--dark); color: var(--dark); }
+.filter-chip.active { background: var(--dark); color: var(--white); border-color: var(--dark); }

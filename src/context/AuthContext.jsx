@@ -35,15 +35,21 @@ export function AuthProvider({ children }) {
   }
 
   useEffect(() => {
+    // Initial session load — this is the only place we need loading=true→false
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-      fetchProfile(session?.user ?? null)
+      const u = session?.user ?? null
+      setUser(u)
+      fetchProfile(u)
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-      setLoading(true)
-      fetchProfile(session?.user ?? null)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      const u = session?.user ?? null
+      setUser(u)
+      // Only re-fetch profile on actual sign in/out, not token refreshes
+      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
+        setLoading(true)
+        fetchProfile(u)
+      }
     })
 
     return () => subscription.unsubscribe()

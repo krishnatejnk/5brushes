@@ -11,12 +11,24 @@ export function AuthProvider({ children }) {
 
   const fetchProfile = async (u) => {
     if (!u) { setProfile(null); setLoading(false); return }
-    // Retry up to 3 times with a short delay — handles DB trigger race on fresh signup
     let data = null
     for (let i = 0; i < 3; i++) {
-      const res = await supabase.from('artists').select('*').eq('id', u.id).single()
-      if (res.data) { data = res.data; break }
-      if (i < 2) await new Promise(r => setTimeout(r, 800))
+      const { data: rows, error } = await supabase
+        .from('artists')
+        .select('*')
+        .eq('id', u.id)
+        .limit(1)
+      if (rows && rows.length > 0) { data = rows[0]; break }
+      // Fallback: try matching by email
+      if (!data && u.email) {
+        const { data: byEmail } = await supabase
+          .from('artists')
+          .select('*')
+          .eq('email', u.email)
+          .limit(1)
+        if (byEmail && byEmail.length > 0) { data = byEmail[0]; break }
+      }
+      if (i < 2) await new Promise(r => setTimeout(r, 600))
     }
     setProfile(data)
     setLoading(false)

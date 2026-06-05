@@ -1,13 +1,19 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../supabase'
+import { useAuth } from '../context/AuthContext'
 import './AuthPage.css'
 
 export default function ArtistRegister() {
+  const { user, isArtist, loading: authLoading } = useAuth()
   const [form, setForm]       = useState({ name: '', bio: '', email: '', password: '' })
   const [error, setError]     = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!authLoading && user && isArtist) navigate('/artist/dashboard', { replace: true })
+  }, [authLoading, user, isArtist])
 
   const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }))
 
@@ -39,19 +45,26 @@ export default function ArtistRegister() {
       return
     }
 
-    // Artist profile is created automatically via database trigger.
-    // Sign in immediately so the session is active.
-    const { error: signInErr } = await supabase.auth.signInWithPassword({
+    const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({
       email:    form.email,
       password: form.password,
     })
 
     if (signInErr) {
-      // Account created — redirect to login
       navigate('/artist/login')
-    } else {
-      navigate('/artist/dashboard')
+      setLoading(false)
+      return
     }
+
+    // Upsert profile as backup in case the DB trigger hasn't fired yet
+    await supabase.from('artists').upsert({
+      id:    signInData.user.id,
+      email: form.email,
+      name:  form.name.trim(),
+      bio:   form.bio.trim(),
+    }, { onConflict: 'id', ignoreDuplicates: true })
+
+    navigate('/artist/dashboard')
     setLoading(false)
   }
 

@@ -10,19 +10,27 @@ export function AuthProvider({ children }) {
   const [loading, setLoading]         = useState(true)
 
   const fetchProfile = async (u) => {
-    if (!u) { setProfile(null); return }
-    const { data } = await supabase.from('artists').select('*').eq('id', u.id).single()
-    setProfile(data ?? null)
+    if (!u) { setProfile(null); setLoading(false); return }
+    // Retry up to 3 times with a short delay — handles DB trigger race on fresh signup
+    let data = null
+    for (let i = 0; i < 3; i++) {
+      const res = await supabase.from('artists').select('*').eq('id', u.id).single()
+      if (res.data) { data = res.data; break }
+      if (i < 2) await new Promise(r => setTimeout(r, 800))
+    }
+    setProfile(data)
+    setLoading(false)
   }
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
-      fetchProfile(session?.user ?? null).then(() => setLoading(false))
+      fetchProfile(session?.user ?? null)
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
+      setLoading(true)
       fetchProfile(session?.user ?? null)
     })
 

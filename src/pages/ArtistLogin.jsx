@@ -1,14 +1,22 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../supabase'
+import { useAuth } from '../context/AuthContext'
 import './AuthPage.css'
 
 export default function ArtistLogin() {
+  const { user, isAdmin, isArtist, loading: authLoading } = useAuth()
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [error, setError]       = useState('')
   const [loading, setLoading]   = useState(false)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (authLoading) return
+    if (user && isAdmin)  navigate('/admin', { replace: true })
+    else if (user && isArtist) navigate('/artist/dashboard', { replace: true })
+  }, [authLoading, user, isAdmin, isArtist])
 
   const handleSubmit = async (e) => {
     e.preventDefault()

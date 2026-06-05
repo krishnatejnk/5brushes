@@ -5,22 +5,22 @@ const AuthContext = createContext(null)
 export const useAuth = () => useContext(AuthContext)
 
 export function AuthProvider({ children }) {
-  const [user, setUser]               = useState(null)
-  const [artistProfile, setProfile]   = useState(null)
-  const [loading, setLoading]         = useState(true)
+  const [user, setUser]             = useState(null)
+  const [artistProfile, setProfile] = useState(null)
+  const [loading, setLoading]       = useState(true)
 
   const fetchProfile = async (u) => {
     if (!u) { setProfile(null); setLoading(false); return }
     let data = null
     for (let i = 0; i < 3; i++) {
-      const { data: rows, error } = await supabase
+      const { data: rows } = await supabase
         .from('artists')
         .select('*')
         .eq('id', u.id)
         .limit(1)
       if (rows && rows.length > 0) { data = rows[0]; break }
-      // Fallback: try matching by email
-      if (!data && u.email) {
+      // Fallback: match by email in case id lookup fails
+      if (u.email) {
         const { data: byEmail } = await supabase
           .from('artists')
           .select('*')
@@ -35,18 +35,17 @@ export function AuthProvider({ children }) {
   }
 
   useEffect(() => {
-    // Initial session load — this is the only place we need loading=true→false
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const u = session?.user ?? null
-      setUser(u)
-      fetchProfile(u)
-    })
-
+    // Use onAuthStateChange as the single source of truth (recommended Supabase v2 pattern).
+    // INITIAL_SESSION fires immediately with the stored session — handles page load.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       const u = session?.user ?? null
       setUser(u)
-      // Only re-fetch profile on actual sign in/out, not token refreshes
-      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
+      if (
+        event === 'INITIAL_SESSION' ||
+        event === 'SIGNED_IN' ||
+        event === 'SIGNED_OUT' ||
+        event === 'USER_UPDATED'
+      ) {
         setLoading(true)
         fetchProfile(u)
       }

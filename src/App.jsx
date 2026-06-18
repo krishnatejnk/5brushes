@@ -1,44 +1,58 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { useAuth } from './context/AuthContext'
-import Navbar from './components/Navbar'
-import Footer from './components/Footer'
-import Home from './pages/Home'
-import Gallery from './pages/Gallery'
-import ArtworkDetail from './pages/ArtworkDetail'
-import About from './pages/About'
-import ArtistLogin from './pages/ArtistLogin'
-import ArtistRegister from './pages/ArtistRegister'
-import ArtistDashboard from './pages/ArtistDashboard'
-import AdminPanel from './pages/AdminPanel'
+import { Routes, Route } from 'react-router-dom';
+import ProtectedRoute, { AdminRoute } from './components/ProtectedRoute';
 
-function ArtistRoute({ children }) {
-  const { user, isArtist, loading } = useAuth()
-  if (loading) return <div className="loading"><div className="spin" /></div>
-  return (user && isArtist) ? children : <Navigate to="/artist/login" replace />
-}
-
-function AdminRoute({ children }) {
-  const { isAdmin, loading } = useAuth()
-  if (loading) return <div className="loading"><div className="spin" /></div>
-  return isAdmin ? children : <Navigate to="/" replace />
-}
+import Landing from './routes/Landing';
+import ArtistAuth from './routes/ArtistAuth';
+import VerifyEmail from './routes/VerifyEmail';
+import Onboarding from './routes/Onboarding';
+import Dashboard from './routes/Dashboard';
+import AddArtwork from './routes/AddArtwork';
+import Admin from './routes/Admin';
+import AdminLogin from './routes/AdminLogin';
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Navbar />
-      <Routes>
-        <Route path="/"                 element={<Home />} />
-        <Route path="/gallery"          element={<Gallery />} />
-        <Route path="/artwork/:id"      element={<ArtworkDetail />} />
-        <Route path="/about"            element={<About />} />
-        <Route path="/artist/login"     element={<ArtistLogin />} />
-        <Route path="/artist/register"  element={<ArtistRegister />} />
-        <Route path="/artist/dashboard" element={<ArtistRoute><ArtistDashboard /></ArtistRoute>} />
-        <Route path="/admin"            element={<AdminRoute><AdminPanel /></AdminRoute>} />
-        <Route path="*"                 element={<Navigate to="/" replace />} />
-      </Routes>
-      <Footer />
-    </BrowserRouter>
-  )
+    <Routes>
+      <Route path="/" element={<Landing />} />
+      <Route path="/artists" element={<ArtistAuth />} />
+      <Route path="/verify" element={<VerifyEmail />} />
+
+      <Route
+        path="/onboarding"
+        element={
+          <ProtectedRoute>
+            <Onboarding />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard/new"
+        element={
+          <ProtectedRoute>
+            <AddArtwork />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route path="/admin/login" element={<AdminLogin />} />
+      <Route
+        path="/admin"
+        element={
+          <AdminRoute>
+            <Admin />
+          </AdminRoute>
+        }
+      />
+
+      <Route path="*" element={<Landing />} />
+    </Routes>
+  );
 }

@@ -1,65 +1,64 @@
-import { createContext, useContext, useEffect, useState } from 'react'
-import { supabase } from '../supabase'
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { supabase } from '../lib/supabaseClient';
 
-const AuthContext = createContext(null)
-export const useAuth = () => useContext(AuthContext)
+const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser]             = useState(null)
-  const [artistProfile, setProfile] = useState(null)
-  const [loading, setLoading]       = useState(true)
+  const [session, setSession] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const fetchProfile = async (u) => {
-    if (!u) { setProfile(null); setLoading(false); return }
-    let data = null
-    for (let i = 0; i < 3; i++) {
-      const { data: rows } = await supabase
-        .from('artists')
-        .select('*')
-        .eq('id', u.id)
-        .limit(1)
-      if (rows && rows.length > 0) { data = rows[0]; break }
-      // Fallback: match by email in case id lookup fails
-      if (u.email) {
-        const { data: byEmail } = await supabase
-          .from('artists')
-          .select('*')
-          .eq('email', u.email)
-          .limit(1)
-        if (byEmail && byEmail.length > 0) { data = byEmail[0]; break }
-      }
-      if (i < 2) await new Promise(r => setTimeout(r, 600))
+  const loadProfile = useCallback(async (userId) => {
+    if (!userId) {
+      setProfile(null);
+      return;
     }
-    setProfile(data)
-    setLoading(false)
-  }
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .maybeSingle();
+    setProfile(data || null);
+  }, []);
 
   useEffect(() => {
-    // Use onAuthStateChange as the single source of truth (recommended Supabase v2 pattern).
-    // INITIAL_SESSION fires immediately with the stored session — handles page load.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      const u = session?.user ?? null
-      setUser(u)
-      if (
-        event === 'INITIAL_SESSION' ||
-        event === 'SIGNED_IN' ||
-        event === 'SIGNED_OUT' ||
-        event === 'USER_UPDATED'
-      ) {
-        setLoading(true)
-        fetchProfile(u)
-      }
-    })
+    let active = true;
 
-    return () => subscription.unsubscribe()
-  }, [])
+    // Initial session
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (!active) return;
+      setSession(data.session);
+      await loadProfile(data.session?.user?.id);
+      setLoading(false);
+    });
 
-  const isAdmin  = !!artistProfile?.is_admin
-  const isArtist = !!artistProfile
+    // React to auth changes (sign in, sign out, email confirmed)
+    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+      setSession(newSession);
+      await loadProfile(newSession?.user?.id);
+    });
 
-  return (
-    <AuthContext.Provider value={{ user, artistProfile, isAdmin, isArtist, loading }}>
-      {children}
-    </AuthContext.Provider>
-  )
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
+  }, [loadProfile]);
+
+  const value = {
+    session,
+    user: session?.user ?? null,
+    profile,
+    loading,
+    isAdmin: profile?.role === 'admin',
+    refreshProfile: () => loadProfile(session?.user?.id),
+    signOut: () => supabase.auth.signOut(),
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used within <AuthProvider>');
+  return ctx;
 }

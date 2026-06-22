@@ -24,12 +24,12 @@ export default function Nav({ variant = 'landing' }) {
 
       {variant === 'landing' && (
         <nav className="nav__links">
-          <Link to="/">Paintings</Link>
-          <a href="#artists">Artists</a>
+{/*           <Link to="/">Paintings</Link> */}
+{/*           <a href="#artists">Artists</a> */}
           {session ? (
             <Link to="/dashboard" className="btn btn-dark btn-sm">My studio</Link>
           ) : (
-            <Link to="/artists" className="btn btn-dark btn-sm">For artists</Link>
+            <Link to="/artists" className="btn btn-dark btn-sm">For Artists</Link>
           )}
         </nav>
       )}

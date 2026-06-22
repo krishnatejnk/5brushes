@@ -139,12 +139,12 @@ textarea { min-height: 90px; resize: vertical; }
 }
 
 /* ---------- landing ---------- */
-.hero { text-align: center; padding: 74px 24px 40px; max-width: 920px; margin: 0 auto; }
+.hero { text-align: center; padding: 94px 24px 00px; max-width: 90%; margin: 0 auto; }
 .hero h1 {
   font-weight: 600; font-size: 68px; line-height: 1.04; letter-spacing: -.01em;
   margin: 22px 0; text-wrap: balance;
 }
-.hero p { font-size: 19px; line-height: 1.6; color: var(--ink-2); max-width: 600px; margin: 0 auto 34px; }
+.hero p { font-size: 19px; line-height: 1.6; color: var(--ink-2); max-width: 600px; margin: 0 auto 0px; }
 .hero-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
 
 .gallery-band { max-width: 1180px; margin: 0 auto; padding: 30px 40px 84px; }
@@ -155,13 +155,13 @@ textarea { min-height: 90px; resize: vertical; }
 }
 .frame .placeholder { border-radius: 3px; }
 .scroll-cue { text-align: center; margin-top: 46px; font-size: 13px; letter-spacing: .16em; text-transform: uppercase; color: var(--faint); }
-
-.two-ways { position: relative; overflow: hidden; background: linear-gradient(180deg, #efe8de, #e9e0d3); padding: 96px 40px 104px; }
+.lin_gradient {background: linear-gradient(180deg, #efe8de, #eacbb4);}
+.two-ways { position: relative; overflow: hidden;  padding: 0px 10% 104px; }
 .blob { position: absolute; border-radius: 50%; filter: blur(44px); }
 .two-ways__head { position: relative; max-width: 1080px; margin: 0 auto 54px; text-align: center; }
 .two-ways__head h2 { font-weight: 600; font-size: 46px; margin: 0 0 12px; }
 .two-ways__head p { font-size: 18px; color: var(--ink-2); margin: 0; }
-.glass-grid { position: relative; max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+.glass-grid { position: relative; max-width: 2000px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
 .glass {
   border-radius: 22px; padding: 40px;
   backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);

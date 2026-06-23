@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Nav from '../components/Nav';
 import BrushMark from '../components/BrushMark';
-
+import logo from '../assets/main_logo.png'
 export default function Landing() {
   const navigate = useNavigate();
   const rootRef = useRef(null);
@@ -27,8 +27,34 @@ export default function Landing() {
       <section className="hero">
         <div className="blob" style={{ top: -60, left: '-10%', width: 360, height: 360, background: 'radial-gradient(circle, rgba(201,98,46,0.35), transparent 68%)' }} />
         <div className="blob" style={{ bottom: -80, right: '-8%', width: 380, height: 380, background: 'radial-gradient(circle, rgba(86,118,168,0.30), transparent 68%)' }} />
-        <h2 className="serif" style={{ color: '#e8915f', fontSize: '4rem', margin: '16px 0', position: 'relative' }}>
-                  5 Brushes is coming soon...
+        <h2
+          className="serif"
+          style={{
+            color: '#e8915f',
+            fontSize: '4rem',
+            margin: '16px 0',
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexWrap: 'wrap',
+            gap: '0.5rem',
+          }}
+        >
+          <img
+            src={logo}
+
+            style={{
+              position: 'static',
+              display: 'inline-block',
+              height: '12rem',
+              width: 'auto',
+              margin: 0,
+              flexShrink: 0,
+              padding: '0 1.5rem 0 0',
+            }}
+          />
+          <span>is coming soon...</span>
         </h2>
 {/*         <div className="eyebrow">Original paintings · India</div> */}
         <h1 className="serif">Original paintings, straight from India's artists.</h1>

@@ -57,7 +57,7 @@ export default function Landing() {
           <span>is coming soon...</span>
         </h2>
 {/*         <div className="eyebrow">Original paintings · India</div> */}
-        <h1 className="serif">Original paintings, straight from India's artists.</h1>
+        <h1 className="serif">Original paintings, straight from the hands of artists, to your hearts.</h1>
 {/*         <p> */}
 {/*           A curated home for one-of-a-kind work. Discover paintings you'll live with — or list */}
 {/*           your own and reach collectors across the country. */}
